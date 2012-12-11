@@ -92,6 +92,8 @@ typedef enum LeavesViewMode {
 
 // refreshes the contents of all pages via the data source methods, much like -[UITableView reloadData]
 - (void) reloadData;
+- (BOOL) touchedNextPage;
+- (BOOL) touchedPrevPage;
 
 @end
 
