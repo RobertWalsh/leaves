@@ -64,10 +64,13 @@ typedef enum LeavesViewMode {
     BOOL zoomActive;
     NSInteger               numberOfVisiblePages;
     LeavesViewMode          mode;
+    
+    BOOL _reversePageTurning;
 }
 
 @property (nonatomic, assign) id<LeavesViewDataSource> dataSource;
 @property (nonatomic, assign) id<LeavesViewDelegate> delegate;
+@property (nonatomic, assign) BOOL reversePageTurning;
 
 // the automatically determined width of the interactive areas on either side of the page
 @property (nonatomic, readonly) CGFloat targetWidth;
@@ -94,6 +97,7 @@ typedef enum LeavesViewMode {
 - (void) reloadData;
 - (BOOL) touchedNextPage;
 - (BOOL) touchedPrevPage;
+- (void) setCurrentPageIndexManuallyTo:(NSUInteger)pageIndex;
 
 @end
 

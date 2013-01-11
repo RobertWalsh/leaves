@@ -23,6 +23,7 @@ CGFloat distance(CGPoint a, CGPoint b);
 
 @synthesize delegate;
 @synthesize leafEdge, currentPageIndex, backgroundRendering, preferredTargetWidth, numberOfVisiblePages;
+@synthesize reversePageTurning = _reversePageTurning;
 
 
 - (void)setZoomActive:(BOOL)aZoomActive {
@@ -207,6 +208,7 @@ CGFloat distance(CGPoint a, CGPoint b);
 }
 
 - (void) initialize {
+    _reversePageTurning = NO;
 	backgroundRendering = NO;
 	pageCache = [[LeavesCache alloc] initWithPageSize:self.bounds.size];
     numberOfVisiblePages = 1;
@@ -259,17 +261,32 @@ CGFloat distance(CGPoint a, CGPoint b);
 
 - (void) getImages {
     
-    if (self.mode == LeavesViewModeSinglePage) 
+    if (self.mode == LeavesViewModeSinglePage)
     {
         if (currentPageIndex < numberOfPages) {
             if (currentPageIndex > 0 && backgroundRendering) {
-                [pageCache precacheImageForPageIndex:currentPageIndex-1];
+                if( _reversePageTurning )
+                {
+                    [pageCache precacheImageForPageIndex:currentPageIndex+1];
+                }
+                else
+                {
+                    [pageCache precacheImageForPageIndex:currentPageIndex-1];
+                }
             }
             topPage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex];
             leftPage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex];
-            if (currentPageIndex < numberOfPages - 1) {
+            if( _reversePageTurning )
+            {
                 topPageReverseImage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex];
-                bottomPage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex + 1];
+                bottomPage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex - 1];
+            }
+            else
+            {
+                if (currentPageIndex < numberOfPages - 1) {
+                    topPageReverseImage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex];
+                    bottomPage.contents = (id)[pageCache cachedImageForPageIndex:currentPageIndex + 1];
+                }
             }
             [pageCache minimizeToPageIndex:currentPageIndex viewMode:self.mode];
         } else {
@@ -383,7 +400,14 @@ CGFloat distance(CGPoint a, CGPoint b);
 
 - (void) didTurnPageForward {
 	interactionLocked = NO;
-	self.currentPageIndex = self.currentPageIndex + 1;	
+    if( _reversePageTurning )
+    {
+        self.currentPageIndex = self.currentPageIndex - 1;
+    }
+    else
+    {
+        self.currentPageIndex = self.currentPageIndex + 1;
+    }
 	[self didTurnToPageAtIndex:currentPageIndex];
 }
 
@@ -462,6 +486,19 @@ CGFloat distance(CGPoint a, CGPoint b);
     [self setLayerFrames];
 }
 
+- (void) setCurrentPageIndexManuallyTo:(NSUInteger)pageIndex
+{
+    if( pageIndex > numberOfPages-1 )
+    {
+        return;
+    }
+    
+    [pageCache precacheImageForPageIndex:pageIndex+1];
+    [pageCache precacheImageForPageIndex:pageIndex-1];
+
+    self.currentPageIndex = pageIndex;
+}
+
 - (void) setCurrentPageIndex:(NSUInteger)aCurrentPageIndex {
 	currentPageIndex = aCurrentPageIndex;
 	
@@ -491,23 +528,44 @@ CGFloat distance(CGPoint a, CGPoint b);
 	if (interactionLocked)
 		return;
 	
+    touchIsActive = NO;
 	UITouch *touch = [event.allTouches anyObject];
 	touchBeganPoint = [touch locationInView:self];
 	
-	if ([self touchedPrevPage] && [self hasPrevPage]) {		
-		[CATransaction begin];
-		[CATransaction setValue:(id)kCFBooleanTrue
-						 forKey:kCATransactionDisableActions];
-		self.currentPageIndex = self.currentPageIndex - numberOfVisiblePages;
-		self.leafEdge = 0.0;
-		[CATransaction commit];
-		touchIsActive = YES;		
-	} 
-	else if ([self touchedNextPage] && [self hasNextPage])
-		touchIsActive = YES;
-	
-	else 
-		touchIsActive = NO;
+    if( _reversePageTurning )
+    {
+     	if ([self touchedPrevPage] && [self hasNextPage] )
+        {
+            [CATransaction begin];
+            [CATransaction setValue:(id)kCFBooleanTrue
+                             forKey:kCATransactionDisableActions];
+            self.currentPageIndex = self.currentPageIndex + numberOfVisiblePages;
+            self.leafEdge = 0.0;
+            [CATransaction commit];
+            touchIsActive = YES;
+        }
+        else if ([self touchedNextPage] && [self hasPrevPage])
+        {
+            touchIsActive = YES;
+        }
+    }
+    else
+    {
+        if ([self touchedPrevPage] && [self hasPrevPage])
+        {
+            [CATransaction begin];
+            [CATransaction setValue:(id)kCFBooleanTrue
+                             forKey:kCATransactionDisableActions];
+            self.currentPageIndex = self.currentPageIndex - numberOfVisiblePages;
+            self.leafEdge = 0.0;
+            [CATransaction commit];
+            touchIsActive = YES;
+        }
+        else if ([self touchedNextPage] && [self hasNextPage])
+        {
+            touchIsActive = YES;
+        }
+    }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
