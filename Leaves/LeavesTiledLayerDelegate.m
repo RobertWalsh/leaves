@@ -26,7 +26,7 @@
 #pragma mark LeavesViewTiledLayer delegated methods
 - (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)context {
     
-    [self.dataSource renderTiledPageAtIndex:self.pageIndex forLayer:layer inContext:context];       
+    [self.dataSource renderTiledPageAtIndex:self.pageIndex forLayer:(LeavesTiledLayer*)layer inContext:context];
 
 }
 
