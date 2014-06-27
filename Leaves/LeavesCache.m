@@ -31,21 +31,23 @@
 
 
 - (CGImageRef) imageForPageIndex:(NSUInteger)pageIndex {
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	CGContextRef context = CGBitmapContextCreate(NULL, 
-												 pageSize.width, 
-												 pageSize.height, 
-												 8,						/* bits per component*/
-												 pageSize.width * 4, 	/* bytes per row */
-												 colorSpace, 
-												 kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
-	CGColorSpaceRelease(colorSpace);
-	CGContextClipToRect(context, CGRectMake(0, 0, pageSize.width, pageSize.height));
+  
+    CGFloat scale = [[UIScreen mainScreen] scale];  // we need to size the graphics context according to the device scale
     
-	[dataSource renderPageAtIndex:pageIndex inContext:context];
+    UIGraphicsBeginImageContextWithOptions(pageSize, YES, 0.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+  	CGContextClipToRect(context, CGRectMake(0, 0, pageSize.width, pageSize.height));
+    CGContextSetFillColorWithColor(context, [[UIColor whiteColor] CGColor]);
+    CGContextFillRect(context, CGContextGetClipBoundingBox(context));
+    
+    // Flip context
+    float viewHeight = pageSize.height;
+    CGContextTranslateCTM(context, 0, viewHeight);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    [dataSource renderPageAtIndex:pageIndex inContext:context];
     
 	CGImageRef image = CGBitmapContextCreateImage(context);
-	CGContextRelease(context);
+    UIGraphicsEndImageContext();
     
 	[UIImage imageWithCGImage:image];
 	CGImageRelease(image);

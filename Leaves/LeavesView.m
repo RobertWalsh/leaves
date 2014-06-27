@@ -120,20 +120,28 @@ CGFloat distance(CGPoint a, CGPoint b);
 - (void) setUpLayers {
 	self.clipsToBounds = YES;
     
+    CGFloat scale =[[UIScreen mainScreen] scale];
+
 	topPage = [[CALayer alloc] init];
+    topPage.contentsScale = scale;  // We need to apply the device display scale to each layer
 	topPage.masksToBounds = YES;
 	topPage.contentsGravity = kCAGravityLeft;
 	topPage.backgroundColor = [[UIColor whiteColor] CGColor];
     
     topPageZoomDelegate = [[LeavesTiledLayerDelegate alloc] init];
+
+    
     topPageZoomLayer = [[LeavesTiledLayer alloc] init];
+    topPageZoomLayer.contentsScale = scale;
     topPageZoomLayer.delegate = topPageZoomDelegate;
     
     
 	topPageOverlay = [[CALayer alloc] init];
+    topPageOverlay.contentsScale = scale;
 	topPageOverlay.backgroundColor = [[[UIColor blackColor] colorWithAlphaComponent:0.2] CGColor];
     
 	topPageShadow = [[CAGradientLayer alloc] init];
+    topPageShadow.contentsScale = scale;
 	topPageShadow.colors = [NSArray arrayWithObjects:
 							(id)[[[UIColor blackColor] colorWithAlphaComponent:0.6] CGColor],
 							(id)[[UIColor clearColor] CGColor],
@@ -142,15 +150,19 @@ CGFloat distance(CGPoint a, CGPoint b);
 	topPageShadow.endPoint = CGPointMake(0,0.5);
     
 	topPageReverse = [[CALayer alloc] init];
+    topPageReverse.contentsScale = scale;
 	topPageReverse.backgroundColor = [[UIColor whiteColor] CGColor];
 	topPageReverse.masksToBounds = YES;
     
 	topPageReverseImage = [[CALayer alloc] init];
+    topPageReverseImage.contentsScale = scale;
 	topPageReverseImage.masksToBounds = YES;
     
 	topPageReverseOverlay = [[CALayer alloc] init];
+    topPageReverseOverlay.contentsScale = scale;
     
 	topPageReverseShading = [[CAGradientLayer alloc] init];
+    topPageReverseShading.contentsScale = scale;
 	topPageReverseShading.colors = [NSArray arrayWithObjects:
 									(id)[[[UIColor blackColor] colorWithAlphaComponent:0.6] CGColor],
 									(id)[[UIColor clearColor] CGColor],
@@ -159,10 +171,12 @@ CGFloat distance(CGPoint a, CGPoint b);
 	topPageReverseShading.endPoint = CGPointMake(0,0.5);
     
 	bottomPage = [[CALayer alloc] init];
+    bottomPage.contentsScale = scale;
 	bottomPage.backgroundColor = [[UIColor whiteColor] CGColor];
 	bottomPage.masksToBounds = YES;
     
 	bottomPageShadow = [[CAGradientLayer alloc] init];
+    bottomPageShadow.contentsScale = scale;
 	bottomPageShadow.colors = [NSArray arrayWithObjects:
 							   (id)[[[UIColor blackColor] colorWithAlphaComponent:0.6] CGColor],
 							   (id)[[UIColor clearColor] CGColor],
@@ -178,15 +192,18 @@ CGFloat distance(CGPoint a, CGPoint b);
     
     // Setup for the left page in two-page mode
     leftPage = [[CALayer alloc] init];
+    leftPage.contentsScale = scale;
 	leftPage.masksToBounds = YES;
 	leftPage.contentsGravity = kCAGravityLeft;
 	leftPage.backgroundColor = [[UIColor whiteColor] CGColor];
     
 	leftPageOverlay = [[CALayer alloc] init];
+    leftPageOverlay.contentsScale = scale;
 	leftPageOverlay.backgroundColor = [[[UIColor blackColor] colorWithAlphaComponent:0.2] CGColor];
     
     topLeftZoomDelegate = [[LeavesTiledLayerDelegate alloc] init];
     topLeftPageZoomLayer = [[LeavesTiledLayer alloc] init];
+    topLeftPageZoomLayer.contentsScale = scale;
     topLeftPageZoomLayer.delegate = topLeftZoomDelegate;
     
 	[leftPage addSublayer:leftPageOverlay];
@@ -204,6 +221,7 @@ CGFloat distance(CGPoint a, CGPoint b);
     
     [self setUpLayersForViewingMode];
     
+    self.layer.contentsScale = scale;
 	self.leafEdge = 1.0;
 }
 
