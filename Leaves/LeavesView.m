@@ -455,7 +455,7 @@ CGFloat distance(CGPoint a, CGPoint b);
 
 - (CGFloat) dragThreshold {
 	// Magic empirical number
-	return 10;
+	return 5;
 }
 
 - (CGFloat) targetWidth {
@@ -593,7 +593,7 @@ CGFloat distance(CGPoint a, CGPoint b);
 	CGPoint touchPoint = [touch locationInView:self];
 	
 	[CATransaction begin];
-	[CATransaction setValue:[NSNumber numberWithFloat:0.07]
+	[CATransaction setValue:[NSNumber numberWithFloat:0.01]
 					 forKey:kCATransactionAnimationDuration];
 	self.leafEdge = touchPoint.x / self.bounds.size.width;
 	[CATransaction commit];
